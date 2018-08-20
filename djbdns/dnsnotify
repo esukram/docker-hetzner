@@ -1,0 +1,44 @@
+#!/usr/bin/perl -w
+
+# usage: dnsnotify zone slave [...]
+# example: dnsnotify example.org 1.2.3.4 1.2.3.5
+# requires Net::DNS >= 0.20
+
+use strict;
+use warnings;
+
+use Net::DNS;
+use Data::Dumper;
+
+#my $MY_IP = "88.198.151.98";  # your own IP here
+my $zone  = shift;
+
+die "usage: dnsnotify zone slave [...]\n"
+  unless defined $zone and @ARGV;
+
+my $res = new Net::DNS::Resolver;
+$res->srcaddr();
+
+for my $slave ( @ARGV ) {
+  my $packet = new Net::DNS::Packet($zone, "SOA", "IN")
+    or die exit 1;
+
+  $packet->header->opcode("NS_NOTIFY_OP");
+  $packet->header->aa(1);
+  $packet->header->rd(0);
+
+  #$packet->print;
+
+  $res->nameservers($slave);
+  print STDERR Dumper($packet);
+  my $reply = $res->send($packet);
+  if ( defined $reply ) {
+    $reply->print;
+    print "exit code: " . $reply->header->rcode . "\n"
+  } else {
+    warn "\n;; TIMED OUT\n";
+    exit 1;
+  }
+}
+
+exit 0;

@@ -1,0 +1,16 @@
+# http://cr.yp.to/djbdns/tcp.html
+
+# allow tcp queries
+:allow,AXFR=""
+
+# allow local IPs for testing/debugging
+172.17.0.1:allow
+172.17.0.10:allow
+176.9.32.54:allow
+# allow hetzner secondary
+213.239.242.238:allow
+213.133.105.6:allow
+193.47.99.3:allow
+
+# deny others
+:deny
